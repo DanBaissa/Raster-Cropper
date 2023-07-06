@@ -69,7 +69,6 @@ def select_output_dir():
     dir_path = filedialog.askdirectory()
     output_dir_var.set(dir_path)
 
-
 def run():
     try:
         country = shapefile[shapefile['COUNTRY'] == country_var.get()]
@@ -86,22 +85,24 @@ def run():
             print('Output file:', output_file)
             crop_raster_with_shapefile(raster_file, country, output_file)
 
-            with rasterio.open(output_file) as src:
-                img = src.read(1)
+            # If view_rasters_var is 1, generate the plots
+            if view_rasters_var.get():
+                with rasterio.open(output_file) as src:
+                    img = src.read(1)
 
-            # Plotting
-            fig, (ax1, ax2) = plt.subplots(ncols=2, figsize=(12, 6))
+                # Plotting
+                fig, (ax1, ax2) = plt.subplots(ncols=2, figsize=(12, 6))
 
-            # Standard plot
-            ax1.imshow(img, cmap='turbo')
-            ax1.set_title("Standard")
+                # Standard plot
+                ax1.imshow(img, cmap='turbo')
+                ax1.set_title("Standard")
 
-            # Log transformed plot
-            # Adding small constant to avoid log(0)
-            ax2.imshow(np.log1p(img), cmap='turbo')
-            ax2.set_title("Log transformed")
+                # Log transformed plot
+                # Adding small constant to avoid log(0)
+                ax2.imshow(np.log1p(img), cmap='turbo')
+                ax2.set_title("Log transformed")
 
-            plt.show()
+                plt.show()
 
         root.update()
     except Exception as e:
@@ -109,10 +110,12 @@ def run():
         messagebox.showerror("Error", str(e))
 
 root = tk.Tk()
+root.title("Raster Cropper")
 
 raster_dir_var = tk.StringVar()
 output_dir_var = tk.StringVar()
 country_var = tk.StringVar()
+view_rasters_var = tk.IntVar()
 
 # Get sorted unique country names
 country_options = sorted(shapefile['COUNTRY'].unique())
@@ -127,6 +130,9 @@ country_dropdown = ttk.Combobox(root, textvariable=country_var)
 country_dropdown['values'] = country_options
 country_dropdown.current(0)  # Set default value to first option
 country_dropdown.pack()
+
+view_rasters_checkbutton = tk.Checkbutton(root, text="View Rasters After they are Cropped", variable=view_rasters_var)
+view_rasters_checkbutton.pack()
 
 run_button = tk.Button(root, text="Run", command=run)
 run_button.pack()
