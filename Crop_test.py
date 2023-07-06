@@ -48,8 +48,8 @@ def crop_raster_with_shapefile(raster_path, country_shape, output_path):
     os.remove(temp_file.name)
 
 # Example usage:
-output_file = "F:/BM_data/test/test.tif"
-crop_raster_with_shapefile("F:/BM_data/test/Ethiopia_2021001.tif", country, output_file)
+output_file = "test/test.tif"
+crop_raster_with_shapefile("test/Ethiopia_2021001.tif", country, output_file)
 
 # Open the resulting raster file
 with rasterio.open(output_file) as src:
