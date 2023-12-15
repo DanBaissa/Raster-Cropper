@@ -2,7 +2,6 @@ import glob
 import tkinter as tk
 from tkinter import filedialog, messagebox
 from tkinter import ttk
-
 import geopandas as gpd
 import matplotlib.pyplot as plt
 import numpy as np
