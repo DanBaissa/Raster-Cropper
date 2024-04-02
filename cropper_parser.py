@@ -12,7 +12,9 @@ import tempfile
 # Load the shapefile
 shapefile = gpd.read_file('Data/World_Countries/World_Countries_Generalized.shp')
 
+
 def crop_raster_with_shapefile(raster_path, country_shape, output_path):
+    print(f"Cropping raster: {os.path.basename(raster_path)}")  # Print the name of the raster being cropped
     with rasterio.open(raster_path) as src:
         image_data = src.read(1) + 1
         country_shape = country_shape.to_crs(src.crs)
@@ -21,14 +23,17 @@ def crop_raster_with_shapefile(raster_path, country_shape, output_path):
                 temp_dst.write(image_data, 1)
 
             with rasterio.open(temp_file.name) as temp_src:
-                out_image, out_transform = mask(temp_src, [mapping(geom) for geom in country_shape.geometry], crop=True, invert=False)
+                out_image, out_transform = mask(temp_src, [mapping(geom) for geom in country_shape.geometry], crop=True,
+                                                invert=False)
                 out_meta = temp_src.meta.copy()
 
-    out_meta.update({"driver": "GTiff", "height": out_image.shape[1], "width": out_image.shape[2], "transform": out_transform})
+    out_meta.update(
+        {"driver": "GTiff", "height": out_image.shape[1], "width": out_image.shape[2], "transform": out_transform})
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     with rasterio.open(output_path, "w", **out_meta) as dest:
         dest.write(out_image[0], 1)
     os.remove(temp_file.name)
+
 
 def run(raster_dir, output_dir, country_name, view_rasters):
     country = shapefile[shapefile['COUNTRY'] == country_name]
@@ -47,6 +52,9 @@ def run(raster_dir, output_dir, country_name, view_rasters):
             ax2.imshow(np.log1p(img), cmap='turbo')
             ax2.set_title("Log transformed")
             plt.show()
+
+    print("All cropping operations completed!")  # Indicate when all cropping operations are complete
+
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description="Crop rasters using a specified country from a shapefile and optionally display the results.")
